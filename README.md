@@ -1,101 +1,88 @@
-## WordPress na AWS com Docker, RDS, EFS e Load Balancer
-Este projeto consiste na implantação de uma aplicação WordPress na AWS utilizando Docker, RDS MySQL, EFS para armazenamento de arquivos estáticos e Load Balancer para distribuição de tráfego.
-### Requisitos
-Conta na AWS.
+### Arquitetura do Projeto
+1. O projeto consiste em uma arquitetura escalável e altamente disponível na AWS, utilizando os seguintes serviços:
 
-Instância EC2 (Amazon Linux 2).
+2. Amazon EC2: Instâncias para hospedar o WordPress.
 
-Banco de dados RDS MySQL.
+3.  Amazon RDS: Banco de dados MySQL para o WordPress.
 
-Sistema de arquivos EFS.
+4. Amazon EFS: Armazenamento de arquivos do WordPress (temas, plugins, uploads).
 
-Load Balancer (Application Load Balancer ou Classic Load Balancer).
+5. Auto Scaling Group: Garante que o número de instâncias EC2 seja ajustado automaticamente com base na demanda.
 
-Docker e Docker Compose instalados na instância EC2.
+6. Load Balancer: Distribui o tráfego entre as instâncias EC2.
 
-Conhecimento básico de AWS, Docker e WordPress.
-### Arquitetura da Solução
-A arquitetura do projeto é composta pelos seguintes componentes:
+### Serviços Utilizados
+#### Amazon EC2:
 
-EC2: Instância onde o WordPress será executado em um contêiner Docker.
+Instâncias para hospedar o WordPress.
 
-RDS MySQL: Banco de dados gerenciado pela AWS para armazenar os dados do WordPress.
+Configuradas com Docker para rodar o WordPress.
 
-EFS: Sistema de arquivos para armazenar os arquivos estáticos do WordPress (ex: uploads, temas, plugins).
+#### Amazon RDS:
 
-Load Balancer: Distribui o tráfego entre as instâncias EC2 (se houver mais de uma) e fornece um único ponto de acesso para a aplicação.
+Banco de dados MySQL para armazenar os dados do WordPress.
 
+Endpoint: compass.cfayu2u66e7w.us-east-1.rds.amazonaws.com.
 
+#### Amazon EFS:
 
+Armazenamento de arquivos do WordPress (temas, plugins, uploads).
 
-### Passo a Passo
-#### 1. Configuração do EC2
-Crie uma instância EC2 com Amazon Linux 2.
+Montado nas instâncias EC2 para persistência de dados.
 
-Configure o Security Group para permitir:
+#### Auto Scaling Group:
 
-SSH (porta 22) a partir do seu IP.
+Ajusta automaticamente o número de instâncias EC2 com base na demanda.
 
-HTTP (porta 80) a partir de qualquer IP (0.0.0.0/0).
+Garante alta disponibilidade e escalabilidade.
 
-Utilize o script de User Data para instalar o Docker e configurar a instância automaticamente.
-#### 2. Configuração do RDS MySQL
-No console da AWS, vá para o serviço RDS.
+#### Load Balancer:
 
-Crie um banco de dados MySQL.
+Distribui o tráfego entre as instâncias EC2.
 
-Anote os seguintes detalhes:
+Garante que o site esteja sempre disponível.
 
-Endpoint do banco de dados.
+### Passos para Configuração
+#### 1. Configuração do RDS
+ Criar um banco de dados MySQL no RDS.
 
-Nome do banco de dados.
+ Configurar o endpoint, usuário, senha e nome do banco de dados.
 
-Usuário e senha.
+#### 2. Configuração do EC2
+ Criar instâncias EC2 com Docker instalado.
 
-Configure o Security Group do RDS para permitir tráfego na porta 3306 a partir do Security Group da instância EC2.
+ Configurar o grupo de segurança para permitir tráfego HTTP (porta 80) e SSH (porta 22).
 
-#### 3. Configuração do EFS
+#### 3. Configuração do WordPress com Docker
+ Criar um arquivo docker-compose.yml para rodar o WordPress.
 
-No console da AWS, vá para o serviço EFS.
+ Mapear o EFS para armazenar os arquivos do WordPress.
 
-Crie um sistema de arquivos EFS.
+#### 4. Configuração do Auto Scaling Group
+ Criar um Auto Scaling Group para gerenciar as instâncias EC2.
 
-Configure o EFS para ser acessível pela instância EC2.
+ Definir políticas de escalabilidade com base na demanda.
 
-Monte o EFS na instância EC2:
+#### 5. Configuração do Load Balancer
+ Criar um Application Load Balancer (ALB) para distribuir o tráfego.
 
-#### 4.Configuração do Load Balancer
-No console da AWS, vá para EC2 > Load Balancers.
+ Configurar o grupo de segurança para permitir tráfego HTTP (porta 80).
 
-Crie um Load Balancer (Application Load Balancer ou Classic Load Balancer).
+#### Possiveis erros
+#### Erro: "Error establishing a database connection"
 
-Configure o Security Group do Load Balancer para permitir tráfego HTTP (porta 80) ou HTTPS (porta 443).
+Verifique as credenciais do banco de dados no docker-compose.yml.
 
-Crie um Target Group e registre a instância EC2.
+Teste a conexão com o RDS a partir da instância EC2.
 
-### Teste e validação
+#### Erro: "Permission denied" ao usar Docker Compose
 
-Acesse o DNS do Load Balancer no navegador.
+Adicione o usuário ao grupo docker:
+sudo usermod -aG docker $USER
+Reinicie a sessão.
 
-Verifique se a tela de instalação do WordPress é exibida.
+#### **Erro: "Unknown database 'compass'"`
 
-Conclua a instalação do WordPress e faça login no painel administrativo.
-
-Verifique se os arquivos estáticos estão sendo armazenados no EFS.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Conecte-se ao RDS e crie o banco de dados compass:
+CREATE DATABASE compass;
 
