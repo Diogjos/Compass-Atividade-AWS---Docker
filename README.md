@@ -1,88 +1,83 @@
-### Arquitetura do Projeto
-1. O projeto consiste em uma arquitetura escalável e altamente disponível na AWS, utilizando os seguintes serviços:
+# 🚀 Deploy de WordPress com Docker na AWS
 
-2. Amazon EC2: Instâncias para hospedar o WordPress.
+Este guia descreve o processo de implantação de um ambiente WordPress na AWS utilizando Docker e Docker Compose. O setup inclui:
 
-3.  Amazon RDS: Banco de dados MySQL para o WordPress.
+## 🔹 1. Configuração da AWS
 
-4. Amazon EFS: Armazenamento de arquivos do WordPress (temas, plugins, uploads).
+### 🔸 VPC e Security Groups
+1. Crie uma **VPC** personalizada.
+2. Configure **subnets públicas e privadas**.
+3. Defina **Security Groups** permitindo acesso HTTP/HTTPS (porta 80/443) e SSH (porta 22).
 
-5. Auto Scaling Group: Garante que o número de instâncias EC2 seja ajustado automaticamente com base na demanda.
+### 🔸 RDS (Banco de Dados MySQL)
+1. Crie uma instância **RDS MySQL**.
+2. Configure o **Security Group** para permitir conexões da EC2.
+3. Anote o **endpoint do banco de dados**.
 
-6. Load Balancer: Distribui o tráfego entre as instâncias EC2.
+### 🔸 EFS (Armazenamento Compartilhado)
+1. Crie um **EFS** para armazenar os arquivos do WordPress.
+2. Configure as permissões de acesso.
 
-### Serviços Utilizados
-#### Amazon EC2:
+### 🔸 EC2 e Load Balancer
+1. Crie uma instância **EC2** com Ubuntu.
+2. Configure um **Load Balancer** para distribuir o tráfego.
 
-Instâncias para hospedar o WordPress.
+## 🔹 2. Configuração da EC2
 
-Configuradas com Docker para rodar o WordPress.
+### 🔸 User Data (Script de Inicialização)
+Durante a criação da EC2, adicione o seguinte script em **User Data** para instalar pacotes essenciais:
 
-#### Amazon RDS:
+```bash
+#!/bin/bash
+apt update && apt upgrade -y
+apt install -y nfs-common docker.io docker-compose
+```
 
-Banco de dados MySQL para armazenar os dados do WordPress.
+### 🔸 Montando o EFS
+Após acessar a EC2 via SSH, monte o EFS:
+```bash
+sudo mkdir -p /mnt/efs
+sudo mount -t nfs4 <EFS-ENDPOINT>:/ /mnt/efs
+```
 
-Endpoint: compass.cfayu2u66e7w.us-east-1.rds.amazonaws.com.
+## 🔹 3. Configuração do Docker Compose
+Crie um arquivo `docker-compose.yml` com o seguinte conteúdo:
 
-#### Amazon EFS:
+```yaml
+version: '3.3'
+services:
+  db:
+    image: mysql:5.7
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: senha_root
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: user
+      MYSQL_PASSWORD: senha
+    volumes:
+      - db_data:/var/lib/mysql
+  wordpress:
+    depends_on:
+      - db
+    image: wordpress:latest
+    restart: always
+    ports:
+      - "80:80"
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: user
+      WORDPRESS_DB_PASSWORD: senha
+      WORDPRESS_DB_NAME: wordpress
+    volumes:
+      - /mnt/efs:/var/www/html
+volumes:
+  db_data:
+```
 
-Armazenamento de arquivos do WordPress (temas, plugins, uploads).
+Execute os comandos:
+```bash
+docker-compose up -d
+```
 
-Montado nas instâncias EC2 para persistência de dados.
-
-#### Auto Scaling Group:
-
-Ajusta automaticamente o número de instâncias EC2 com base na demanda.
-
-Garante alta disponibilidade e escalabilidade.
-
-#### Load Balancer:
-
-Distribui o tráfego entre as instâncias EC2.
-
-Garante que o site esteja sempre disponível.
-
-### Passos para Configuração
-#### 1. Configuração do RDS
- Criar um banco de dados MySQL no RDS.
-
- Configurar o endpoint, usuário, senha e nome do banco de dados.
-
-#### 2. Configuração do EC2
- Criar instâncias EC2 com Docker instalado.
-
- Configurar o grupo de segurança para permitir tráfego HTTP (porta 80) e SSH (porta 22).
-
-#### 3. Configuração do WordPress com Docker
- Criar um arquivo docker-compose.yml para rodar o WordPress.
-
- Mapear o EFS para armazenar os arquivos do WordPress.
-
-#### 4. Configuração do Auto Scaling Group
- Criar um Auto Scaling Group para gerenciar as instâncias EC2.
-
- Definir políticas de escalabilidade com base na demanda.
-
-#### 5. Configuração do Load Balancer
- Criar um Application Load Balancer (ALB) para distribuir o tráfego.
-
- Configurar o grupo de segurança para permitir tráfego HTTP (porta 80).
-
-#### Possiveis erros
-#### Erro: "Error establishing a database connection"
-
-Verifique as credenciais do banco de dados no docker-compose.yml.
-
-Teste a conexão com o RDS a partir da instância EC2.
-
-#### Erro: "Permission denied" ao usar Docker Compose
-
-Adicione o usuário ao grupo docker:
-sudo usermod -aG docker $USER
-Reinicie a sessão.
-
-#### **Erro: "Unknown database 'compass'"`
-
-Conecte-se ao RDS e crie o banco de dados compass:
-CREATE DATABASE compass;
+Agora acesse `http://<IP-DA-EC2>` e complete a instalação do WordPress. 🚀
 
