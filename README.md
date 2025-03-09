@@ -1,31 +1,41 @@
-# 🚀 Deploy de WordPress com Docker na AWS
+# 📌 Atividade AWS - Docker
 
-Este guia descreve o processo de implantação de um ambiente WordPress na AWS utilizando Docker e Docker Compose. O setup inclui:
+## 📅 Prazo
+- **Entrega**: 10/03/2025 (Enviar o link do repositório com código, versionamento e documentação no chat da Daily)
+- **Apresentação**: 11/03/2025
 
-## 🔹 1. Configuração da AWS
+## 📌 Objetivo
+Esta atividade tem como objetivo fixar conhecimentos sobre **Docker e AWS**, implementando uma aplicação WordPress com:
+- **EC2 com Docker** para hospedar a aplicação
+- **RDS (MySQL)** como banco de dados
+- **EFS** para armazenar arquivos estáticos
+- **Load Balancer (LB)** para balanceamento de carga
 
-### 🔸 VPC e Security Groups
-1. Crie uma **VPC** personalizada.
-2. Configure **subnets públicas e privadas**.
-3. Defina **Security Groups** permitindo acesso HTTP/HTTPS (porta 80/443) e SSH (porta 22).
+## 📌 Requisitos
+### ✅ Configuração do EC2 com Docker
+1. Criar uma instância **EC2**
+2. Instalar e configurar o **Docker** ou **Containerd**
+3. Implementar a configuração via **script User Data** (`user_data.sh`)
 
-### 🔸 RDS (Banco de Dados MySQL)
-1. Crie uma instância **RDS MySQL**.
-2. Configure o **Security Group** para permitir conexões da EC2.
-3. Anote o **endpoint do banco de dados**.
+### ✅ Deploy da aplicação WordPress
+1. Criar um container para a aplicação
+2. Criar um container para o banco de dados **MySQL no RDS**
 
-### 🔸 EFS (Armazenamento Compartilhado)
-1. Crie um **EFS** para armazenar os arquivos do WordPress.
-2. Configure as permissões de acesso.
+### ✅ Configuração do **EFS (Elastic File System)**
+1. Configurar o EFS para armazenar os arquivos estáticos do WordPress
 
-### 🔸 EC2 e Load Balancer
-1. Crie uma instância **EC2** com Ubuntu.
-2. Configure um **Load Balancer** para distribuir o tráfego.
+### ✅ Configuração do **Load Balancer (LB)**
+1. Configurar o **Load Balancer Classic** para distribuir tráfego
+2. **Evitar utilizar IP público** para exposição do serviço
 
-## 🔹 2. Configuração da EC2
+### ✅ Outros Pontos
+- O WordPress deve estar acessível pela porta **80 ou 8080**
+- Uso de **Dockerfile ou Docker Compose** fica a critério da equipe
+- Versionamento do código no **GitHub**
+- Criar documentação
 
-### 🔸 User Data (Script de Inicialização)
-Durante a criação da EC2, adicione o seguinte script em **User Data** para instalar pacotes essenciais:
+## 📌 Configuração do Docker no EC2
+Durante a criação da EC2, adicionar o seguinte **User Data**:
 
 ```bash
 #!/bin/bash
@@ -33,15 +43,13 @@ apt update && apt upgrade -y
 apt install -y nfs-common docker.io docker-compose
 ```
 
-### 🔸 Montando o EFS
-Após acessar a EC2 via SSH, monte o EFS:
+### 🔹 Montando o EFS
 ```bash
 sudo mkdir -p /mnt/efs
 sudo mount -t nfs4 <EFS-ENDPOINT>:/ /mnt/efs
 ```
 
-## 🔹 3. Configuração do Docker Compose
-Crie um arquivo `docker-compose.yml` com o seguinte conteúdo:
+## 📌 Arquivo `docker-compose.yml`
 
 ```yaml
 version: '3.3'
@@ -74,10 +82,16 @@ volumes:
   db_data:
 ```
 
-Execute os comandos:
+### 🔹 Deploy da Aplicação
 ```bash
 docker-compose up -d
 ```
 
-Agora acesse `http://<IP-DA-EC2>` e complete a instalação do WordPress. 🚀
+Agora, acesse `http://<IP-DA-EC2>` e complete a instalação do WordPress. 🚀
+
+---
+
+## 📌 Considerações Finais
+
+📌 Certifique-se de que a aplicação está rodando corretamente e de que o Load Balancer está distribuindo o tráfego adequadamente. A entrega será avaliada com base na execução funcional e na estrutura da configuração. Boa sorte! 🚀
 
