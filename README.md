@@ -28,8 +28,25 @@ Este guia descreve o processo de implantação de um ambiente **WordPress** na *
    - Permitir conexão apenas da **EC2** na porta **3306**.  
 
 ---
+## 📌 2. Configuração do Banco de Dados RDS  
+1. Vá para **RDS Dashboard** e clique em **Create Database**.  
+2. Escolha **MySQL**, versão **5.7**.  
+3. Defina as credenciais de acesso:  
+   - **Usuário**: `user`  
+   - **Senha**: `senha`  
+4. Coloque a instância na **subnet privada** da VPC.  
+5. Configure o **Security Group** para permitir acesso apenas da **EC2**.  
 
-## 📌 2. Criando a Instância EC2  
+---
+
+## 📌 3. Criando o EFS para Armazenamento Compartilhado  
+1. Acesse o **EFS Dashboard** e clique em **Create File System**.  
+2. Escolha a **mesma VPC da EC2** e **subnets públicas**.  
+3. Configure permissões para a EC2 acessar o EFS.  
+4. Pegue o **endpoint do EFS** e adicione no script de User Data da EC2.  
+
+---
+## 📌 4. Criando a Instância EC2  
 1. Acesse o **EC2 Dashboard** e clique em **Launch Instance**.  
 2. Escolha a **imagem Ubuntu 22.04 LTS**.  
 3. Selecione um **tipo de instância** (ex: `t2.micro` para Free Tier).  
@@ -84,24 +101,7 @@ docker-compose up -d
 
 ---
 
-## 📌 3. Configuração do Banco de Dados RDS  
-1. Vá para **RDS Dashboard** e clique em **Create Database**.  
-2. Escolha **MySQL**, versão **5.7**.  
-3. Defina as credenciais de acesso:  
-   - **Usuário**: `user`  
-   - **Senha**: `senha`  
-4. Coloque a instância na **subnet privada** da VPC.  
-5. Configure o **Security Group** para permitir acesso apenas da **EC2**.  
 
----
-
-## 📌 4. Criando o EFS para Armazenamento Compartilhado  
-1. Acesse o **EFS Dashboard** e clique em **Create File System**.  
-2. Escolha a **mesma VPC da EC2** e **subnets públicas**.  
-3. Configure permissões para a EC2 acessar o EFS.  
-4. Pegue o **endpoint do EFS** e adicione no script de User Data da EC2.  
-
----
 
 ## 📌 5. Criando o Load Balancer  
 1. Vá para **EC2 > Load Balancers** e clique em **Create Load Balancer**.  
