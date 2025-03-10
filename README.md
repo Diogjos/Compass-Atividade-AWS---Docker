@@ -105,10 +105,9 @@ docker-compose up -d
 
 ## 📌 5. Criando o Load Balancer  
 1. Vá para **EC2 > Load Balancers** e clique em **Create Load Balancer**.  
-2. Escolha **Application Load Balancer**.  
+2. Escolha **Classic Load Balancer**.  
 3. Defina:  
-   - **Listeners** na porta **80** e **443**.  
-   - **Target Group** com a instância **EC2** rodando o WordPress.  
+   - **Listeners** na porta **80** e **443**.    
 4. Configure o **Health Check** na porta **80**.  
 5. Associe o Load Balancer ao Security Group correto.  
 
